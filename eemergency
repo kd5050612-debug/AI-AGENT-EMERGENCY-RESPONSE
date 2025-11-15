@@ -1,0 +1,23 @@
+import json, pprint
+
+def emergency_agent(report: str, age=None, condition=None):
+    prompt = build_prompt(report, age, condition)
+    raw = gemini_reasoning(prompt)
+    parsed = None
+    try:
+        start = raw.find("{")
+        end = raw.rfind("}") + 1
+        parsed = json.loads(raw[start:end])
+    except Exception:
+        parsed = {
+            "severity": "unknown",
+            "immediate_actions": [raw],
+            "call_ambulance": True,
+            "items_for_paramedics": [],
+            "brief_explanation": raw if len(raw) < 400 else raw[:400] + "..."
+        }
+    return {"raw": raw, "parsed": parsed}
+
+o = emergency_agent("Person collapsed and not breathing", age=56, condition="unconscious")
+pprint.pprint(o["parsed"])
+print("\nRAW (truncated):\n", o["raw"][:800])
