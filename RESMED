@@ -1,0 +1,9 @@
+
+
+response = medical_agent.ask(
+    symptoms="Severe chest pain, shortness of breath, sweating",
+    age=45,
+    history="High blood pressure"
+)
+
+response
