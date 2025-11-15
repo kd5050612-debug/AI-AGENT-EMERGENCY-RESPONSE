@@ -1,0 +1,8 @@
+result = security_agent.ask(
+    description="A person is trying to break into a parked car.",
+    location="Mall parking area",
+    people_involved=1,
+    weapons_suspected=False
+)
+
+result
