@@ -1,0 +1,54 @@
+class SecurityAI_Agent:
+    """
+    Agent that analyzes security threats (theft, active shooter, suspicious activity, threats)
+    and returns an actionable JSON plan: severity, immediate actions, notify police, secure area, etc.
+    """
+
+    def __init__(self, client):
+        self.client = client
+
+    def build_prompt(self, description: str, location: str = None, people_involved: int = None, weapons_suspected: bool = False):
+        loc_str = location if location is not None else "unknown"
+        people_str = str(people_involved) if people_involved is not None else "unknown"
+        weapons_str = "yes" if weapons_suspected else "no"
+
+        return (
+            "You are a SECURITY RESPONSE ASSISTANT.\n\n"
+            f"Incident description: {description}\n"
+            f"Location: {loc_str}\n"
+            f"People involved (approx): {people_str}\n"
+            f"Weapons suspected: {weapons_str}\n\n"
+            "Respond ONLY with valid JSON using this schema:\n"
+            "{\n"
+            '  "severity": "low|medium|high|critical",\n'
+            '  "immediate_actions": ["action1","action2"],\n'
+            '  "notify_police": true or false,\n'
+            '  "secure_area_advice": ["advice1","advice2"],\n'
+            '  "brief_explanation": "one concise sentence"\n'
+            "}\n\n"
+            "Prioritize life-safety and avoiding escalation. Keep responses short and actionable."
+        )
+
+    def ask(self, description: str, location: str = None, people_involved: int = None, weapons_suspected: bool = False):
+        prompt = self.build_prompt(description, location, people_involved, weapons_suspected)
+        raw = gemini_reasoning(prompt)
+
+        # Safe JSON extraction
+        try:
+            start = raw.find("{")
+            end = raw.rfind("}") + 1
+            json_text = raw[start:end]
+            parsed = json.loads(json_text)
+        except Exception:
+            parsed = {
+                "severity": "unknown",
+                "immediate_actions": [raw],
+                "notify_police": True,
+                "secure_area_advice": ["Move to safe location", "Avoid confrontation"],
+                "brief_explanation": raw if len(raw) < 300 else raw[:300] + "..."
+            }
+
+        return {"raw": raw, "parsed": parsed}
+
+security_agent = SecurityAI_Agent(client)
+print("✅ Security / Police Agent ready")
