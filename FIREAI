@@ -1,0 +1,50 @@
+class FireAI_Agent:
+    """
+    Agent that analyzes fire incidents (building fire, wildfires, vehicle fire, etc.)
+    and returns concise JSON with prioritized steps.
+    """
+
+    def __init__(self, client):
+        self.client = client
+
+    def build_prompt(self, incident_description: str, location: str = None, people_involved: int = None):
+        loc_str = location if location is not None else "unknown"
+        people_str = str(people_involved) if people_involved is not None else "unknown"
+        return (
+            "You are a FIRE INCIDENT RESPONSE ASSISTANT.\n\n"
+            f"Incident: {incident_description}\n"
+            f"Location: {loc_str}\n"
+            f"People involved (approx): {people_str}\n\n"
+            "Respond ONLY with valid JSON using this schema:\n"
+            "{\n"
+            '  "severity": "low|medium|high|critical",\n'
+            '  "immediate_actions": ["action1","action2"],\n'
+            '  "evacuation_required": true or false,\n'
+            '  "suggested_contacts": ["fire_station","police","ambulance"],\n'
+            '  "brief_explanation": "one concise sentence"\n'
+            "}\n\n"
+            "Focus on life-safety first, then property containment. Keep responses short and actionable."
+        )
+
+    def ask(self, incident_description: str, location: str = None, people_involved: int = None):
+        prompt = self.build_prompt(incident_description, location, people_involved)
+        raw = gemini_reasoning(prompt)
+
+        try:
+            start = raw.find("{")
+            end = raw.rfind("}") + 1
+            json_text = raw[start:end]
+            parsed = json.loads(json_text)
+        except Exception:
+            parsed = {
+                "severity": "unknown",
+                "immediate_actions": [raw],
+                "evacuation_required": True,
+                "suggested_contacts": ["fire_station", "ambulance"],
+                "brief_explanation": raw if len(raw) < 300 else raw[:300] + "..."
+            }
+
+        return {"raw": raw, "parsed": parsed}
+
+fire_agent = FireAI_Agent(client)
+print("✅ Fire Incident Agent ready")
