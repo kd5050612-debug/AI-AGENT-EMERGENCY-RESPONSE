@@ -1,0 +1,47 @@
+class EmergencyAI_Agent:
+
+    def __init__(self, client):
+        self.client = client
+
+    def build_prompt(self, report, age=None, condition=None):
+        age_str = str(age) if age is not None else "unknown"
+        cond_str = condition if condition is not None else "not specified"
+        return (
+            "You are an emergency response assistant.\n\n"
+            f"Report: {report}\n"
+            f"Age: {age_str}\n"
+            f"Condition: {cond_str}\n\n"
+            "Respond ONLY with valid JSON using this schema:\n"
+            "{\n"
+            '  "severity": "low|medium|high|critical",\n'
+            '  "immediate_actions": ["action1","action2"],\n'
+            '  "call_ambulance": true or false,\n'
+            '  "items_for_paramedics": ["item1"],\n'
+            '  "brief_explanation": "one concise sentence"\n'
+            "}\n"
+        )
+
+    def ask(self, report, age=None, condition=None):
+        prompt = self.build_prompt(report, age, condition)
+
+        raw = gemini_reasoning(prompt)
+
+        try:
+            start = raw.find("{")
+            end = raw.rfind("}") + 1
+            parsed = json.loads(raw[start:end])
+        except:
+            parsed = {
+                "severity": "unknown",
+                "immediate_actions": ["Unable to parse AI response."],
+                "call_ambulance": True,
+                "items_for_paramedics": [],
+                "brief_explanation": "Raw output returned.",
+                "raw_output": raw
+            }
+
+        return {"raw": raw, "parsed": parsed}
+
+emergency_agent = EmergencyAI_Agent(client)
+
+print("✅ Emergency AI Agent is ready.")
