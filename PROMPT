@@ -1,0 +1,39 @@
+def build_prompt(report, age=None, condition=None):
+    """
+    Build an emergency response agent prompt for LLM/AI reasoning.
+    Args:
+        report (str): Description of the emergency situation.
+        age (int, optional): Age of the person involved.
+        condition (str, optional): Medical or relevant condition.
+    Returns:
+        str: Formatted prompt for the agent.
+    """
+    input_age = age if age is not None else "<not provided>"
+    input_condition = condition if condition is not None else "<not provided>"
+    prompt = f"""
+You are an EMERGENCY RESPONSE AGENT.
+Analyze the situation and return ONLY JSON.
+
+Input:
+- Emergency Report: {report}
+- Age: {input_age}
+- Condition: {input_condition}
+
+Output JSON structure:
+
+{{
+  "severity": "",
+  "summary": "",
+  "immediate_steps": [],
+  "needs_ambulance": true
+}}
+"""
+    return prompt
+
+# Example usage:
+example_prompt = build_prompt(
+    report="Person unconscious, not breathing",
+    age=47,
+    condition="Diabetic"
+)
+print(example_prompt)
