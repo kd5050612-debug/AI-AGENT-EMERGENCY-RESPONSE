@@ -1,0 +1,11 @@
+test = emergency_agent.ask(
+    report="Person collapsed and not breathing.",
+    age=45,
+    condition="unconscious"
+)
+
+print("------ PARSED JSON ------")
+pprint.pprint(test["parsed"])
+
+print("\n------ RAW OUTPUT ------")
+print(test["raw"])
