@@ -1,0 +1,52 @@
+class MedicalAI_Agent:
+
+    def __init__(self, client):
+        self.client = client
+
+    def build_prompt(self, symptoms, age=None, history=None):
+        age_str = str(age) if age else "unknown"
+        history_str = history if history else "none"
+
+        return f"""
+You are a MEDICAL DIAGNOSIS AI.
+
+Input:
+Symptoms: {symptoms}
+Age: {age_str}
+Medical History: {history_str}
+
+Respond ONLY in JSON:
+
+{{
+  "possible_conditions": ["condition1","condition2"],
+  "risk_level": "low|medium|high|critical",
+  "recommended_tests": ["test1","test2"],
+  "urgent_action": "",
+  "advice": ""
+}}
+"""
+
+    def ask(self, symptoms, age=None, history=None):
+        raw = gemini_reasoning(
+            self.build_prompt(symptoms, age, history)
+        )
+
+        try:
+            extracted = raw[raw.index("{"): raw.rindex("}")+1]
+            parsed = json.loads(extracted)
+        except:
+            parsed = {
+                "possible_conditions": [],
+                "risk_level": "unknown",
+                "recommended_tests": [],
+                "urgent_action": "Unable to parse",
+                "advice": "",
+                "raw_output": raw
+            }
+
+        return {"raw": raw, "parsed": parsed}
+
+
+medical_agent = MedicalAI_Agent(client)
+
+print("✅ Medical Diagnosis Agent Ready")
