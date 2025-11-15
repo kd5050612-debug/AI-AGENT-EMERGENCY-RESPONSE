@@ -1,0 +1,29 @@
+def gemini_reasoning(prompt):
+    """
+    Sends the prompt to Gemini using the latest google-genai SDK.
+    """
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[prompt]
+        )
+        return response.text
+    except Exception as e:
+        return f"ERROR from Gemini: {e}"
+
+
+def emergency_agent(report, age=None, condition=None):
+    """
+    Builds the prompt -> Sends to Gemini -> Returns output.
+    """
+    prompt = build_prompt(report, age, condition)
+    return gemini_reasoning(prompt)
+
+result = emergency_agent(
+    report="Person bleeding heavily and unconscious",
+    age=32,
+    condition="Accident"
+)
+
+print("----- AI RESPONSE -----")
+print(result)
