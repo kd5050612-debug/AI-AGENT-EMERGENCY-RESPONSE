@@ -1,0 +1,8 @@
+
+response = fire_agent.ask(
+    incident_description="Massive flames coming from a residential building, smoke spreading quickly.",
+    location="Mumbai, Andheri West",
+    people_involved=12
+)
+
+response
