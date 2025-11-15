@@ -1,0 +1,30 @@
+
+
+class EmergencyAgent(LlmAgent):
+    """
+    ADK-based Emergency Response Agent.
+    Uses your Gemini model as the LLM backend.
+    """
+
+    def llm(self, session, context, input_data):
+        """
+        This method is executed every time the agent is called.
+        It feeds the prompt into Gemini and returns AI result.
+        """
+        report = input_data.get("report", "")
+        age = input_data.get("age", None)
+        condition = input_data.get("condition", None)
+
+        prompt = build_prompt(report, age, condition)
+
+        # Call Gemini with your working function (from Cell 6)
+        response = gemini_reasoning(prompt)
+
+        return {
+            "response_json": response
+        }
+
+
+emergency_agent_adk = EmergencyAgent(name="emergency_response_agent")
+
+print("✅ ADK Agent created successfully")
